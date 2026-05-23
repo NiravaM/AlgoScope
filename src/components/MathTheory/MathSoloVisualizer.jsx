@@ -86,11 +86,46 @@ export const MathSoloVisualizer = () => {
   }
 
   const currentSource = useMemo(() => {
-    if (algo === 'gcd') return getGCDSource(language)
-    if (algo === 'expo') return getFastExpoSource(language)
-    if (algo === 'sieve') return getSieveSource(language)
-    return getBitManipSource(language)
-  }, [algo, language])
+    let code = ''
+    if (algo === 'gcd') {
+      code = getGCDSource(language)
+      if (code) {
+        code = code.replace(/gcd\(48,\s*18\)/g, `gcd(${gcdA}, ${gcdB})`)
+      }
+    } else if (algo === 'expo') {
+      code = getFastExpoSource(language)
+      if (code) {
+        code = code.replace(/fastPow\(2,\s*10\)/g, `fastPow(${expoBase}, ${expoExp})`)
+        code = code.replace(/fast_pow\(2,\s*10\)/g, `fast_pow(${expoBase}, ${expoExp})`)
+      }
+    } else if (algo === 'sieve') {
+      code = getSieveSource(language)
+      if (code) {
+        code = code.replace(/sieve\(30\)/g, `sieve(${sieveLimit})`)
+        code = code.replace(/sieve_of_eratosthenes\(30\)/g, `sieve_of_eratosthenes(${sieveLimit})`)
+      }
+    } else {
+      code = getBitManipSource(language)
+      if (code) {
+        const binA = Number(bitA).toString(2).padStart(8, '0')
+        const binB = Number(bitB).toString(2).padStart(8, '0')
+        code = code.replace(/0b00101010/g, `0b${binA}`)
+        code = code.replace(/0b00001111/g, `0b${binB}`)
+        code = code.replace(/42/g, `${bitA}`)
+        code = code.replace(/15/g, `${bitB}`)
+        
+        const numA = Number(bitA)
+        const numB = Number(bitB)
+        code = code.replace(/= 10/g, `= ${numA & numB}`)
+        code = code.replace(/= 47/g, `= ${numA | numB}`)
+        code = code.replace(/= 37/g, `= ${numA ^ numB}`)
+        code = code.replace(/= 213/g, `= ${(~numA & 0xFF)}`)
+        code = code.replace(/= 84/g, `= ${numA << 1}`)
+        code = code.replace(/= 21/g, `= ${numA >> 1}`)
+      }
+    }
+    return code || '// No implementation available'
+  }, [algo, language, gcdA, gcdB, expoBase, expoExp, sieveLimit, bitA, bitB])
 
   const activeLine = useMemo(() => {
     if (!currentStep?.lineKey) return undefined
