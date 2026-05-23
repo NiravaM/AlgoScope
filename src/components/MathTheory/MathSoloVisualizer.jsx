@@ -95,8 +95,11 @@ export const MathSoloVisualizer = () => {
     } else if (algo === 'expo') {
       code = getFastExpoSource(language)
       if (code) {
+        const result = Math.pow(Number(expoBase), Number(expoExp))
         code = code.replace(/fastPow\(2,\s*10\)/g, `fastPow(${expoBase}, ${expoExp})`)
         code = code.replace(/fast_pow\(2,\s*10\)/g, `fast_pow(${expoBase}, ${expoExp})`)
+        code = code.replace(/\/\/\s*1024/g, `// ${result}`)
+        code = code.replace(/#\s*1024/g, `# ${result}`)
       }
     } else if (algo === 'sieve') {
       code = getSieveSource(language)
